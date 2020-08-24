@@ -1,4 +1,4 @@
-name: Build OS and EE 3.12.x image
+name: Build/Push OS and EE 3.12.x image
 
 on:
   create:
@@ -18,23 +18,24 @@ jobs:
         run: |
           echo ${{ env.RELEASE_VERSION }}
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
+      - name: Login to docker hub
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build OSS image
+        run: docker build -t hasancelik/hazelcast:${{ env.RELEASE_VERSION }} -f ./hazelcast-oss/Dockerfile .
+
+      - name: Build Enterprise image
+        run: docker build -t hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }} -f ./hazelcast-enterprise/Dockerfile .
+
+      - name: Push OSS image to DockerHub
+        uses: actions-hub/docker@master
         with:
-          buildx-version: v0.4.1
-          qemu-version: 4.2.0-7
+          args: push hasancelik/hazelcast:${{ env.RELEASE_VERSION }}
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build/Push OSS image
-        run: |
-          docker buildx build --push \
-            --tag hasancelik/hazelcast:${{ env.RELEASE_VERSION }} \
-            --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x hazelcast-oss
-      - name: Build/Push EE image
-        run: |
-          docker buildx build --push \
-            --tag hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }} \
-            --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x hazelcast-enterprise
+      - name: Push OSS image to DockerHub
+        uses: actions-hub/docker@master
+        with:
+          args: push hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }}
