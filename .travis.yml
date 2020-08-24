@@ -32,11 +32,9 @@ script:
       docker run --name ${HAZELCAST_IMAGE}-container -e PROMETHEUS_PORT=$PROMETHEUS_PORT --rm $HAZELCAST_IMAGE 2>&1 | grep -q "Hazelcast Enterprise"
     fi
 
-# notifications:
-#   email:
-#     recipients:
-#       - rafal@hazelcast.com
-#       - mesut@hazelcast.com
-#       - hasan@hazelast.com
-#     on_success: never
-#     on_failure: always
+notifications:
+  email:
+    recipients:
+      - hasan@hazelast.com
+    on_success: never
+    on_failure: always
