@@ -25,10 +25,13 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build OSS image
-        run: docker build -t hasancelik/hazelcast:${{ env.RELEASE_VERSION }} -f ./hazelcast-oss/Dockerfile .
+        run: |
+          cd ./hazelcast-oss/
+          docker build -t hasancelik/hazelcast:${{ env.RELEASE_VERSION }} .
 
-      - name: Build Enterprise image
-        run: docker build -t hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }} -f ./hazelcast-enterprise/Dockerfile .
+        run: |
+          cd ./hazelcast-enterprise/
+          docker build -t hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }} .
 
       - name: Push OSS image to DockerHub
         uses: actions-hub/docker@master
