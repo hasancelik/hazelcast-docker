@@ -34,20 +34,6 @@ jobs:
         with:
           version: v0.5.1
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build/Push OSS image
-        run: |
-          TAGS="--tag hasancelik/hazelcast:${{ env.RELEASE_VERSION }}"
-          if [[ "${{ env.PUSH_LATEST }}" == "yes" ]]; then
-            TAGS="${TAGS} --tag hasancelik/hazelcast:latest"
-          fi
-          docker buildx build --push \
-            --build-arg HZ_VERSION=${{ env.RELEASE_VERSION }} \
-            ${TAGS} \
-            --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x hazelcast-oss
-
       - name: Update Docker Hub Description of OSS image
         if: env.PUSH_LATEST == 'yes'
         uses: peter-evans/dockerhub-description@v2
@@ -57,17 +43,6 @@ jobs:
           repository: hasancelik/hazelcast
           short-description: Hazelcast IMDG Docker Image
           readme-filepath: ./README.md
-
-      - name: Build/Push EE image
-        run: |
-          TAGS="--tag hasancelik/hazelcast-enterprise:${{ env.RELEASE_VERSION }}"
-          if [[ "${{ env.PUSH_LATEST }}" == "yes" ]]; then
-            TAGS="${TAGS} --tag hasancelik/hazelcast-enterprise:latest"
-          fi
-          docker buildx build --push \
-            --build-arg HZ_VERSION=${{ env.RELEASE_VERSION }} \
-            ${TAGS} \
-            --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x hazelcast-enterprise
 
       - name: Update Docker Hub Description of EE image
         if: env.PUSH_LATEST == 'yes'
